@@ -59,7 +59,7 @@ def deepsort_update(Tracker,pred,xywh,np_img):
     return outputs
 
 def save_yolopreds_tovideo(yolo_preds,id_to_ava_labels,color_map,output_video):
-    for i, (im, pred) in enumerate(zip(yolo_preds.imgs, yolo_preds.pred)):
+    for i, (im, pred) in enumerate(zip(yolo_preds.ims, yolo_preds.pred)):
         im=cv2.cvtColor(im,cv2.COLOR_BGR2RGB)
         if pred.shape[0]:
             for j, (*box, cls, trackid, vx, vy) in enumerate(pred):
@@ -75,7 +75,7 @@ def save_yolopreds_tovideo(yolo_preds,id_to_ava_labels,color_map,output_video):
         output_video.write(im.astype(np.uint8))
 
 def main(config):
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5l6')
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s6')
     model.conf = config.conf
     model.iou = config.iou
     model.max_det = 200
@@ -112,7 +112,7 @@ def main(config):
         print(i,video_clips.shape,img_num)
         deepsort_outputs=[]
         for j in range(len(yolo_preds.pred)):
-            temp=deepsort_update(deepsort_tracker,yolo_preds.pred[j].cpu(),yolo_preds.xywh[j][:,0:4].cpu(),yolo_preds.imgs[j])
+            temp=deepsort_update(deepsort_tracker,yolo_preds.pred[j].cpu(),yolo_preds.xywh[j][:,0:4].cpu(),yolo_preds.ims[j])
             if len(temp)==0:
                 temp=np.ones((0,8))
             deepsort_outputs.append(temp.astype(np.float32))
@@ -139,7 +139,7 @@ def main(config):
     
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', type=str, default="/home/wufan/images/video/vad.mp4", help='test imgs folder or video or camera')
+    parser.add_argument('--input', type=str, default="test.mp4", help='test imgs folder or video or camera')
     parser.add_argument('--output', type=str, default="output.mp4", help='folder to save result imgs, can not use input folder')
     # object detect config
     parser.add_argument('--imsize', type=int, default=640, help='inference size (pixels)')
